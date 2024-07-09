@@ -1,6 +1,8 @@
+import rabbitMQService from './rabbitMQService';
 class FilesService {
     getFiles = async () => {
-        throw new Error("Method not implemented");
+        await rabbitMQService.sendToQueue('Get files');
+        return true;
     }
 }
 
