@@ -4,7 +4,9 @@ import './config/logging';
 import {loggingHandler} from "./middleware/loggingHandler";
 import {corsHandler} from "./middleware/corsHandler";
 import {routeNotFound} from "./middleware/routeNotFound";
+import filesRouter from "./routes/files";
 import { SERVER } from './config/config';
+import {errorHandler} from "./middleware/errorHandler";
 export const app = express();
 export let httpServer: ReturnType<typeof http.createServer>;
 
@@ -31,8 +33,10 @@ export function StartServer() {
     logging.log('----------------------------------------');
     logging.log('Define Routing Error');
     logging.log('----------------------------------------');
+    app.use('/api', filesRouter)
     app.use(routeNotFound);
 
+    app.use(errorHandler);
     logging.log('----------------------------------------');
     logging.log('Starting Server');
     logging.log('----------------------------------------');
