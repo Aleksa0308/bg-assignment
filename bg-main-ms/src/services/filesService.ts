@@ -1,7 +1,7 @@
 import rabbitMQService from './rabbitMQService';
 class FilesService {
-    getFiles = async () => {
-        await rabbitMQService.sendToQueue('Get files');
+    getFiles = async (correlationId: string) => {
+        await rabbitMQService.sendToQueue(correlationId, 'Get files');
         return true;
     }
 }

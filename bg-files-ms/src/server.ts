@@ -6,10 +6,11 @@ import {corsHandler} from "./middleware/corsHandler";
 import {routeNotFound} from "./middleware/routeNotFound";
 import { SERVER } from './config/config';
 import {errorHandler} from "./middleware/errorHandler";
+import rabbitMQService from "./services/rabbitMQService";
 export const app = express();
 export let httpServer: ReturnType<typeof http.createServer>;
 
-export function StartServer() {
+export async function StartServer() {
     logging.info('-------------------------------------')
     logging.info('Server - Starting');
     logging.info('-------------------------------------')
@@ -28,6 +29,12 @@ export function StartServer() {
     app.get('/main/healthcheck', (req, res, next) => {
         return res.status(200).json({ hello: 'world!' });
     });
+
+    logging.info('-------------------------------------')
+    logging.info('RabbitMQ Service');
+    logging.info('-------------------------------------')
+    await rabbitMQService.initialize();
+    await rabbitMQService.consumeMessage();
 
     logging.log('----------------------------------------');
     logging.log('Define Routing Error');
@@ -48,4 +55,4 @@ export function StartServer() {
 
 export const Shutdown = (callback: any) => httpServer && httpServer.close(callback);
 
-StartServer();
+StartServer().then(r => logging.info('Server started successfully'));

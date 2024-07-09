@@ -1,28 +1,37 @@
 import amqp from 'amqplib';
 import { RABBITMQ } from '../config/config';
+import logging from '../config/logging';
 
 class RabbitMQService {
     private connection!: amqp.Connection;
     private channel!: amqp.Channel;
-    private queue: string = 'fileQueue';
+    private requestQueue: string = 'fileQueue';
 
-    async connect() {
+    async initialize() {
         this.connection = await amqp.connect(`amqp://${RABBITMQ.RABBITMQ_HOST}`);
         this.channel = await this.connection.createChannel();
-        await this.channel.assertQueue(this.queue, { durable: true });
+        await this.channel.assertQueue(this.requestQueue, { durable: true });
     }
 
-    async sendToQueue(message: string) {
-        if(!this.channel) await this.connect();
+    async consumeMessage() {
+        await this.channel.prefetch(1);
 
-        this.channel.sendToQueue(this.queue, Buffer.from(JSON.stringify({
-            message,
-            timestamp: Date.now()
-        })), {
-            persistent: true
+        await this.channel.consume(this.requestQueue, (message) => {
+            if (message) {
+                const content = message.content.toString();
+                const data = JSON.parse(content);
+                logging.info(`Received message: ${JSON.stringify(data)}`);
+
+                const replyQueue = message.properties.replyTo;
+                this.channel.sendToQueue(replyQueue,
+                    Buffer.from(JSON.stringify({ hello: "world" })), {
+                        correlationId: message.properties.correlationId
+                    });
+                this.channel.ack(message);
+
+                logging.info(`Sent message reply to ${replyQueue}`);
+            }
         });
-
-        logging.info(`The message ${message} has been sent to the queue ${this.queue}`);
     }
 }
 
