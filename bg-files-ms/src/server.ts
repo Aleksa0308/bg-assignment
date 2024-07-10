@@ -7,6 +7,7 @@ import { routeNotFound } from './middleware/routeNotFound';
 import { SERVER } from './config/config';
 import { errorHandler } from './middleware/errorHandler';
 import rabbitMQService from './services/rabbitMQService';
+import redisService from './services/redisService';
 export const app = express();
 export let httpServer: ReturnType<typeof http.createServer>;
 
@@ -31,10 +32,12 @@ export async function StartServer() {
     });
 
     logging.info('-------------------------------------');
-    logging.info('RabbitMQ Service');
+    logging.info('RabbitMQ and Redis Service');
     logging.info('-------------------------------------');
     await rabbitMQService.initialize();
     await rabbitMQService.consumeMessage();
+
+    await redisService.initialize();
 
     logging.log('----------------------------------------');
     logging.log('Define Routing Error');

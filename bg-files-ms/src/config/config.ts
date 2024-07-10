@@ -14,8 +14,14 @@ export const RABBITMQ = {
     RABBITMQ_PORT_HTTP: process.env.RABBITMQ_PORT_HTTP ? Number(process.env.RABBITMQ_PORT_HTTP) : 15672,
     RABBITMQ_EXCHANGE: process.env.RABBITMQ_EXCHANGE || 'filesExchange'
 };
+
+export const REDIS = {
+    REDIS_HOST: process.env.REDIS_HOST || 'localhost',
+    REDIS_PORT: process.env.REDIS_PORT ? Number(process.env.REDIS_PORT) : 6379
+}
 export const SERVER = {
     SERVER_HOST,
     SERVER_PORT,
-    RABBITMQ
+    RABBITMQ,
+    REDIS
 };

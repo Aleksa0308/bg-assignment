@@ -1,4 +1,5 @@
 import axios from 'axios';
+import redisService from './redisService';
 
 interface ApiResponse {
     items: FileInfo[];
@@ -18,8 +19,13 @@ interface Directory {
 class FileProcessService {
     async processFile() {
         try {
+            if(await redisService.get('files')) return redisService.get('files');
+
             const data = await this.fetchData();
             // const data = { items: this.mockData };
+
+            const result = this.buildResponseObject(data.items);
+            await redisService.set('files', result, 30);
             return this.buildResponseObject(data.items);
         } catch (error) {
             logging.error(`Error processing file: ${error}`);

@@ -7,6 +7,8 @@ class RabbitMQService {
     private connection!: amqp.Connection;
     private channel!: amqp.Channel;
     private requestQueue: string = 'fileQueue';
+    private maxRetries: number = 5;
+    private retryDelay: number = 5000;
 
     async initialize() {
         this.connection = await amqp.connect(`amqp://${RABBITMQ.RABBITMQ_HOST}`);
