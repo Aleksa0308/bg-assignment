@@ -33,7 +33,7 @@ Separate the load between two microservices:
 	 - The main server responsible for responding to the client
 	 - Sending messages to the queue
  - **bs-files-ms**:
-	 - The worker server responsible for processing the api response
+	 - The worker server responsible for processing the API response
 	 - And for sending the replay back to the main server
 
 The **RPC (request-replay) pattern** was used for communication between microservices with RabbitMQ. <br>
@@ -44,7 +44,7 @@ This also offloads the heavy operations from our main server.
 
 **Radis** server is there for the server-side cashing of the processing results. The expiration time has been set for easier testing purposes to **30 seconds**.
 
-This architecture allows smooth integration of other microservices in the future, allowing the creation of new exchanges and queues, new worker services, etc.
+This architecture allows smooth integration of other microservices in the future, creating new exchanges and queues, new worker services, etc.
 
 ## Server Structure
 
