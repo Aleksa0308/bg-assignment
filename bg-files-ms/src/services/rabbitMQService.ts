@@ -1,6 +1,7 @@
 import amqp from 'amqplib';
 import { RABBITMQ } from '../config/config';
 import logging from '../config/logging';
+import fileProcessService from "./fileProcessService";
 
 class RabbitMQService {
     private connection!: amqp.Connection;
@@ -16,15 +17,17 @@ class RabbitMQService {
     async consumeMessage() {
         await this.channel.prefetch(1);
 
-        await this.channel.consume(this.requestQueue, (message) => {
+        await this.channel.consume(this.requestQueue, async (message) => {
             if (message) {
                 const content = message.content.toString();
                 const data = JSON.parse(content);
                 logging.info(`Received message: ${JSON.stringify(data)}`);
 
+                const responsePayload = await fileProcessService.processFile();
+
                 const replyQueue = message.properties.replyTo;
                 this.channel.sendToQueue(replyQueue,
-                    Buffer.from(JSON.stringify({ hello: "world" })), {
+                    Buffer.from(JSON.stringify(responsePayload)), {
                         correlationId: message.properties.correlationId
                     });
                 this.channel.ack(message);
