@@ -18,33 +18,36 @@ class RabbitMQService {
             const q = await this.channel.assertQueue('', { exclusive: true });
             this.replyQueue = q.queue;
 
-            await this.channel.consume(this.replyQueue, (msg) => {
-                if (msg) {
-                    const correlationId = msg.properties.correlationId;
-                    const message = JSON.parse(msg.content.toString());
+            await this.channel.consume(
+                this.replyQueue,
+                (msg) => {
+                    if (msg) {
+                        const correlationId = msg.properties.correlationId;
+                        const message = JSON.parse(msg.content.toString());
 
-                    if (this.pendingReplies.has(correlationId)) {
-                        const resolve = this.pendingReplies.get(correlationId);
-                        if (resolve) {
-                            resolve(message);
+                        if (this.pendingReplies.has(correlationId)) {
+                            const resolve = this.pendingReplies.get(correlationId);
+                            if (resolve) {
+                                resolve(message);
+                            }
+                            this.pendingReplies.delete(correlationId);
+                            this.channel.ack(msg);
                         }
-                        this.pendingReplies.delete(correlationId);
-                        this.channel.ack(msg);
                     }
-                }
-            }, {noAck: false});
+                },
+                { noAck: false }
+            );
         }
     }
 
     async sendToQueue(correlationId: string, message: string) {
         await this.connect();
 
-        this.channel.sendToQueue(this.requestQueue,
-            Buffer.from(JSON.stringify({ message })), {
-                persistent: true,
-                correlationId: correlationId,
-                replyTo: this.replyQueue
-            });
+        this.channel.sendToQueue(this.requestQueue, Buffer.from(JSON.stringify({ message })), {
+            persistent: true,
+            correlationId: correlationId,
+            replyTo: this.replyQueue
+        });
 
         logging.info(`The message ${message} has been sent to the queue ${this.requestQueue}`);
     }

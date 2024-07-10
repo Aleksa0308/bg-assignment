@@ -1,25 +1,25 @@
 import http from 'http';
 import express from 'express';
 import './config/logging';
-import {loggingHandler} from "./middleware/loggingHandler";
-import {corsHandler} from "./middleware/corsHandler";
-import {routeNotFound} from "./middleware/routeNotFound";
+import { loggingHandler } from './middleware/loggingHandler';
+import { corsHandler } from './middleware/corsHandler';
+import { routeNotFound } from './middleware/routeNotFound';
 import { SERVER } from './config/config';
-import {errorHandler} from "./middleware/errorHandler";
-import rabbitMQService from "./services/rabbitMQService";
+import { errorHandler } from './middleware/errorHandler';
+import rabbitMQService from './services/rabbitMQService';
 export const app = express();
 export let httpServer: ReturnType<typeof http.createServer>;
 
 export async function StartServer() {
-    logging.info('-------------------------------------')
+    logging.info('-------------------------------------');
     logging.info('Server - Starting');
-    logging.info('-------------------------------------')
+    logging.info('-------------------------------------');
     app.use(express.urlencoded({ extended: true }));
     app.use(express.json());
 
-    logging.info('-------------------------------------')
+    logging.info('-------------------------------------');
     logging.info('Logging & Configuration');
-    logging.info('-------------------------------------')
+    logging.info('-------------------------------------');
     app.use(loggingHandler);
     app.use(corsHandler);
 
@@ -30,9 +30,9 @@ export async function StartServer() {
         return res.status(200).json({ hello: 'world!' });
     });
 
-    logging.info('-------------------------------------')
+    logging.info('-------------------------------------');
     logging.info('RabbitMQ Service');
-    logging.info('-------------------------------------')
+    logging.info('-------------------------------------');
     await rabbitMQService.initialize();
     await rabbitMQService.consumeMessage();
 
@@ -55,4 +55,4 @@ export async function StartServer() {
 
 export const Shutdown = (callback: any) => httpServer && httpServer.close(callback);
 
-StartServer().then(r => logging.info('Server started successfully'));
+StartServer().then((r) => logging.info('Server started successfully'));

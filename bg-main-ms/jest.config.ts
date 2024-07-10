@@ -5,7 +5,7 @@ const config: Config = {
     testEnvironment: 'node',
     roots: ['<rootDir>/test'],
     maxWorkers: 1,
-    detectOpenHandles: true,
-}
+    detectOpenHandles: true
+};
 
 export default config;

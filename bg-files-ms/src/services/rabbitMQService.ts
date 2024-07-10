@@ -1,7 +1,7 @@
 import amqp from 'amqplib';
 import { RABBITMQ } from '../config/config';
 import logging from '../config/logging';
-import fileProcessService from "./fileProcessService";
+import fileProcessService from './fileProcessService';
 
 class RabbitMQService {
     private connection!: amqp.Connection;
@@ -26,10 +26,9 @@ class RabbitMQService {
                 const responsePayload = await fileProcessService.processFile();
 
                 const replyQueue = message.properties.replyTo;
-                this.channel.sendToQueue(replyQueue,
-                    Buffer.from(JSON.stringify(responsePayload)), {
-                        correlationId: message.properties.correlationId
-                    });
+                this.channel.sendToQueue(replyQueue, Buffer.from(JSON.stringify(responsePayload)), {
+                    correlationId: message.properties.correlationId
+                });
                 this.channel.ack(message);
 
                 logging.info(`Sent message reply to ${replyQueue}`);
