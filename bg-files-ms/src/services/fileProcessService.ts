@@ -10,23 +10,23 @@ interface FileInfo {
 }
 
 interface FileStructure {
-    [key: string]: Directory | string[];
+    [key: string]: Folder | string[];
 }
 
-interface Directory {
-    [key: string]: Directory | string[];
+interface Folder {
+    [key: string]: Folder | string[];
 }
 class FileProcessService {
     async processFile() {
         try {
-            if(await redisService.get('files')) return redisService.get('files');
+            if (await redisService.get('files')) return redisService.get('files');
 
             const data = await this.fetchData();
             // const data = { items: this.mockData };
 
             const result = this.buildResponseObject(data.items);
             await redisService.set('files', result, 30);
-            return this.buildResponseObject(data.items);
+            return result;
         } catch (error) {
             logging.error(`Error processing file: ${error}`);
         }
@@ -85,7 +85,7 @@ class FileProcessService {
             const pathParts = this.getPathParts(fileUrl);
 
             this.initIp(result, ip);
-            let currentLevel: Directory | string[] = result[ip];
+            let currentLevel: Folder | string[] = result[ip];
 
             for (let i = 0; i < pathParts.length; i++) {
                 const part = pathParts[i];
@@ -104,7 +104,7 @@ class FileProcessService {
                 } else {
                     // Not a file, it's a directory
                     if (Array.isArray(currentLevel)) {
-                        currentLevel = this.findOrCreateDirectory(currentLevel, part);
+                        currentLevel = this.findOrCreateFolder(currentLevel, part);
                     } else if (typeof currentLevel === 'object') {
                         if (!Array.isArray(currentLevel[part])) {
                             currentLevel[part] = [];
@@ -135,15 +135,15 @@ class FileProcessService {
         }
     };
 
-    findOrCreateDirectory = (currentLevel: (Directory | string[] | string)[], directoryName: string): Directory | string[] => {
-        let directory = currentLevel.find((entry): entry is Directory => typeof entry === 'object' && entry.hasOwnProperty(directoryName));
+    findOrCreateFolder = (currentLevel: (Folder | string[] | string)[], directoryName: string): Folder | string[] => {
+        let directory = currentLevel.find((entry): entry is Folder => typeof entry === 'object' && entry.hasOwnProperty(directoryName));
 
         if (!directory) {
             directory = { [directoryName]: [] };
             currentLevel.push(directory);
         }
 
-        return directory[directoryName] as Directory | string[];
+        return directory[directoryName] as Folder | string[];
     };
 }
 
