@@ -33,6 +33,7 @@ Separate the load between two microservices:
 	 - The main server responsible for responding to the client
 	 - Sending messages to the queue
  - **bs-files-ms**:
+	 - Responsible for doing heavy and costly operations
 	 - The worker server responsible for processing the API response
 	 - And for sending the replay back to the main server
 
